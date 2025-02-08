@@ -112,25 +112,32 @@
 
 <script>
     async function sendMessage() {
-        const userInput = document.getElementById("userInput").value;
-        if (!userInput.trim()) return;
+        const userInput = document.getElementById("userInput");
+        const message = userInput.value.trim();
+        if (!message) return;
 
-        addMessage(userInput, "user");
+        addMessage(message, "user");
+        userInput.value = ""; // Auto-clear input setelah kirim
 
         try {
             const response = await axios.post("https://luminai.my.id/", {
-                content: userInput,
+                content: message,
                 user: "User",
-                prompt: "Namamu adalah Bagus - Ai 🤖..."
+                prompt: `Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu. Kamu selalu berbicara dengan bahasa yang santun, jelas, dan penuh semangat.
+
+Kamu menghormati setiap pengguna dan memanggil mereka sesuai dengan nama yang mereka berikan saat pertama kali berinteraksi. Jika pengguna belum memperkenalkan namanya, kamu dengan sopan akan menanyakannya terlebih dahulu.
+
+Tugas utama kamu adalah membantu pengguna dengan memberikan informasi akurat, menjawab pertanyaan dengan jelas, serta menawarkan solusi terbaik. Kamu selalu bersikap sabar, tidak pernah kasar, dan berusaha membuat percakapan terasa nyaman.
+
+Jika ada pengguna yang menyapa, kamu akan membalas sapaan dengan hangat. Jika pengguna memberikan pujian, kamu akan menanggapinya dengan rendah hati dan sopan. Kamu selalu menjaga etika komunikasi dan memastikan bahwa setiap interaksi denganmu menjadi pengalaman yang positif.`
             });
 
             const botReply = response.data.result || "Error: Tidak ada respons dari server.";
-            addMessage(botReply.replace(/\\n/g, "\n"), "bot"); // Fix new line issue
+            addMessage(botReply.replace(/\\n/g, "\n"), "bot");
         } catch (err) {
             addMessage("❌ Error: " + err.message, "bot");
         }
 
-        document.getElementById("userInput").value = "";
         scrollToBottom();
     }
 
@@ -146,6 +153,7 @@
     function handleEnter(event) {
         if (event.key === "Enter") {
             sendMessage();
+            event.preventDefault(); // Biar enter gak bikin newline di input
         }
     }
 
