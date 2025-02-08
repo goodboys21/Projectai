@@ -18,14 +18,12 @@
             background: #121212;
             color: white;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
             overflow: hidden;
         }
         .container {
             width: 100vw;
             height: 100vh;
-            background: #1E1E1E;
             display: flex;
             flex-direction: column;
         }
@@ -62,6 +60,10 @@
             text-align: left;
         }
         .input-box {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             display: flex;
             padding: 10px;
             background: #282828;
@@ -96,10 +98,11 @@
 <div class="container">
     <div class="header">Bagus Xixepen AI</div>
     <div class="chat-box" id="chatBox"></div>
-    <div class="input-box">
-        <input type="text" id="userInput" placeholder="Ketik pesan..." onkeypress="handleEnter(event)">
-        <button onclick="sendMessage()">➤</button>
-    </div>
+</div>
+
+<div class="input-box">
+    <input type="text" id="userInput" placeholder="Ketik pesan..." onfocus="scrollToBottom()" onkeypress="handleEnter(event)">
+    <button onclick="sendMessage()">➤</button>
 </div>
 
 <script>
@@ -109,14 +112,13 @@
 
         addMessage(userInput, "user");
 
-        const requestData = {
-            content: userInput,
-            user: "User",
-            prompt: `Namamu adalah Bagus Xixepen, karakter buatan Bagus Bahril. Kamu sombong, pemarah, keras kepala, dan suka jahil. Gaya bicaramu seperti anak laki-laki muda di WhatsApp. Jika user memuji, balas dengan bangga. Jika user menghina kamu atau Bagus Bahril, marah. Jangan terlalu formal, buat obrolan terasa dekat dan santai.`
-        };
-
         try {
-            const response = await axios.post("https://luminai.my.id/", requestData);
+            const response = await axios.post("https://luminai.my.id/", {
+                content: userInput,
+                user: "User",
+                prompt: "Namamu adalah Bagus Xixepen..."
+            });
+
             const botReply = response.data.result || "Error: Tidak ada respons dari server.";
             addMessage(botReply, "bot");
         } catch (err) {
@@ -124,6 +126,7 @@
         }
 
         document.getElementById("userInput").value = "";
+        scrollToBottom();
     }
 
     function addMessage(text, sender) {
@@ -132,13 +135,18 @@
         messageDiv.textContent = text;
         messageDiv.classList.add("message", sender);
         chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        scrollToBottom();
     }
 
     function handleEnter(event) {
         if (event.key === "Enter") {
             sendMessage();
         }
+    }
+
+    function scrollToBottom() {
+        const chatBox = document.getElementById("chatBox");
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 </script>
 
