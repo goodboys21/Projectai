@@ -44,12 +44,13 @@
             padding: 60px 10px 70px;
             display: flex;
             flex-direction: column;
+            max-height: calc(100vh - 60px - 45px);
         }
         .message {
             max-width: 75%;
             padding: 10px;
             border-radius: 15px;
-            margin-bottom: 5px;
+            margin-bottom: 20px; /* Memberikan ruang antar pesan */
             font-size: 14px;
             word-wrap: break-word;
             white-space: pre-line;
@@ -69,8 +70,8 @@
             font-size: 10px;
             color: #bbb;
             position: absolute;
-            bottom: -15px;
-            right: 5px;
+            bottom: -18px; /* Memberikan jarak lebih jauh */
+            right: 10px;
         }
         .input-box {
             position: fixed;
@@ -78,7 +79,6 @@
             left: 0;
             width: 100%;
             display: flex;
-            align-items: center;
             padding: 10px;
             background: #282828;
         }
@@ -96,7 +96,7 @@
         button {
             background: #007bff;
             border: none;
-            padding: 12px;
+            padding: 12px 16px;
             border-radius: 50%;
             color: white;
             cursor: pointer;
@@ -104,48 +104,29 @@
             align-items: center;
             justify-content: center;
             font-size: 18px;
-            margin-left: 5px;
-        }
-        .sticker-btn {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-        .sticker-btn img {
-            width: 35px;
-            height: 35px;
         }
         .typing-indicator {
             display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 3px;
-            margin-bottom: 5px;
+            gap: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            align-self: flex-start;
         }
         .typing-indicator span {
             width: 8px;
             height: 8px;
-            background: white;
+            background: #bbb;
             border-radius: 50%;
-            opacity: 0.5;
             animation: typing 1.5s infinite ease-in-out;
         }
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
         @keyframes typing {
-            0%, 100% {
-                opacity: 0.5;
-                transform: translateY(0);
-            }
-            50% {
-                opacity: 1;
-                transform: translateY(-5px);
-            }
+            0% { opacity: 0.3; transform: translateY(0px); }
+            50% { opacity: 1; transform: translateY(-5px); }
+            100% { opacity: 0.3; transform: translateY(0px); }
         }
     </style>
 </head>
@@ -157,9 +138,6 @@
 </div>
 
 <div class="input-box">
-    <button class="sticker-btn" onclick="sendSticker()">
-        <img src="https://files.catbox.moe/3ux0l2.png" alt="Sticker">
-    </button>
     <input type="text" id="userInput" placeholder="Ketik pesan..." onfocus="adjustForKeyboard()" onblur="resetChatHeight()" onkeypress="handleEnter(event)">
     <button onclick="sendMessage()">➤</button>
 </div>
@@ -171,55 +149,45 @@
         if (!message) return;
 
         addMessage(message, "user");
-        userInput.value = "";
+        userInput.value = ""; 
 
         showTypingIndicator();
 
-        try {
-            const response = await axios.post("https://luminai.my.id/", {
-                content: `Halo, kamu adalah Bagus AI, chatbot pintar yang bisa membantu menjawab pertanyaan pengguna dengan bahasa yang santai dan informatif. Jawablah setiap pertanyaan dengan jelas, singkat, dan mudah dipahami. Jika ada yang tanya tentang waktu, gunakan format WIB. Jika ditanya sesuatu yang tidak kamu ketahui, jangan mengarang, cukup bilang tidak tahu. Jawabanmu harus terlihat natural seperti manusia berbicara. Berikut pertanyaan dari pengguna: ${message}`,
-                user: "User"
-            });
+        setTimeout(async () => {
+            try {
+                const response = await axios.post("https://luminai.my.id/", {
+                    content: message,
+                    user: "User",
+                    prompt: "Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu."
+                });
 
-            hideTypingIndicator();
-            const botReply = response.data.result || "Error: Tidak ada respons dari server.";
-            addMessage(botReply.replace(/\\n/g, "\n"), "bot");
-        } catch (err) {
-            hideTypingIndicator();
-            addMessage("❌ Error: " + err.message, "bot");
-        }
+                hideTypingIndicator();
+                const botReply = response.data.result || "Error: Tidak ada respons dari server.";
+                addMessage(botReply.replace(/\\n/g, "\n"), "bot");
+            } catch (err) {
+                hideTypingIndicator();
+                addMessage("❌ Error: " + err.message, "bot");
+            }
 
-        scrollToBottom();
+            scrollToBottom();
+        }, 1000); // Tambahkan delay 1 detik sebelum bot membalas
     }
 
     function addMessage(text, sender) {
         const chatBox = document.getElementById("chatBox");
         const messageDiv = document.createElement("div");
+        const timestamp = document.createElement("span");
+
         messageDiv.textContent = text;
         messageDiv.classList.add("message", sender);
 
-        const timeStamp = document.createElement("div");
-        timeStamp.classList.add("timestamp");
-        timeStamp.textContent = new Date().toLocaleTimeString("id-ID", { hour12: false }) + " WIB";
+        timestamp.textContent = getCurrentTime();
+        timestamp.classList.add("timestamp");
 
-        messageDiv.appendChild(timeStamp);
+        messageDiv.appendChild(timestamp);
         chatBox.appendChild(messageDiv);
-        scrollToBottom();
-    }
 
-    function showTypingIndicator() {
-        const chatBox = document.getElementById("chatBox");
-        const typingDiv = document.createElement("div");
-        typingDiv.classList.add("typing-indicator");
-        typingDiv.id = "typingIndicator";
-        typingDiv.innerHTML = `<span></span><span></span><span></span>`;
-        chatBox.appendChild(typingDiv);
         scrollToBottom();
-    }
-
-    function hideTypingIndicator() {
-        const typingDiv = document.getElementById("typingIndicator");
-        if (typingDiv) typingDiv.remove();
     }
 
     function handleEnter(event) {
@@ -231,25 +199,45 @@
 
     function scrollToBottom() {
         setTimeout(() => {
-            document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
-        }, 100);
-    }
-
-    function sendSticker() {
-        addMessage("🖼️ [Sticker dikirim]", "user");
-        scrollToBottom();
+            const chatBox = document.getElementById("chatBox");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }, 50);
     }
 
     function adjustForKeyboard() {
         setTimeout(() => {
-            document.querySelector(".chat-box").style.paddingBottom = "100px";
-        }, 300);
+            document.querySelector(".chat-box").style.paddingBottom = "120px";
+            scrollToBottom();
+        }, 100);
     }
 
     function resetChatHeight() {
         setTimeout(() => {
             document.querySelector(".chat-box").style.paddingBottom = "70px";
-        }, 300);
+        }, 100);
+    }
+
+    function getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " WIB";
+    }
+
+    function showTypingIndicator() {
+        const chatBox = document.getElementById("chatBox");
+        const typingDiv = document.createElement("div");
+        typingDiv.classList.add("typing-indicator");
+        typingDiv.id = "typingIndicator";
+        for (let i = 0; i < 3; i++) {
+            const dot = document.createElement("span");
+            typingDiv.appendChild(dot);
+        }
+        chatBox.appendChild(typingDiv);
+        scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+        const typingDiv = document.getElementById("typingIndicator");
+        if (typingDiv) typingDiv.remove();
     }
 </script>
 
