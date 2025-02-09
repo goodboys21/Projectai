@@ -41,9 +41,10 @@
         .chat-box {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 60px 10px 10px;
+            padding: 60px 10px 80px; /* Tambah padding bawah biar gak ketumpuk input */
             display: flex;
             flex-direction: column;
+            max-height: calc(100vh - 60px - 50px); /* Pastikan gak ketumpuk header & input */
         }
         .message {
             max-width: 75%;
@@ -123,13 +124,7 @@
             const response = await axios.post("https://luminai.my.id/", {
                 content: message,
                 user: "User",
-                prompt: `Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu. Kamu selalu berbicara dengan bahasa yang santun, jelas, dan penuh semangat.
-
-Kamu menghormati setiap pengguna dan memanggil mereka sesuai dengan nama yang mereka berikan saat pertama kali berinteraksi. Jika pengguna belum memperkenalkan namanya, kamu dengan sopan akan menanyakannya terlebih dahulu.
-
-Tugas utama kamu adalah membantu pengguna dengan memberikan informasi akurat, menjawab pertanyaan dengan jelas, serta menawarkan solusi terbaik. Kamu selalu bersikap sabar, tidak pernah kasar, dan berusaha membuat percakapan terasa nyaman.
-
-Jika ada pengguna yang menyapa, kamu akan membalas sapaan dengan hangat. Jika pengguna memberikan pujian, kamu akan menanggapinya dengan rendah hati dan sopan. Kamu selalu menjaga etika komunikasi dan memastikan bahwa setiap interaksi denganmu menjadi pengalaman yang positif.`
+                prompt: `Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu.`
             });
 
             const botReply = response.data.result || "Error: Tidak ada respons dari server.";
@@ -161,20 +156,22 @@ Jika ada pengguna yang menyapa, kamu akan membalas sapaan dengan hangat. Jika pe
         setTimeout(() => {
             const chatBox = document.getElementById("chatBox");
             chatBox.scrollTop = chatBox.scrollHeight;
-        }, 100);
+        }, 50);
     }
 
     function adjustForKeyboard() {
         setTimeout(() => {
-            document.querySelector(".chat-box").style.paddingBottom = "150px";
+            const chatBox = document.getElementById("chatBox");
+            chatBox.style.paddingBottom = "200px"; // Tambah space buat keyboard
             scrollToBottom();
-        }, 300);
+        }, 100);
     }
 
     function resetChatHeight() {
         setTimeout(() => {
-            document.querySelector(".chat-box").style.paddingBottom = "10px";
-        }, 300);
+            const chatBox = document.getElementById("chatBox");
+            chatBox.style.paddingBottom = "80px"; // Pastikan scroll tetap nyaman
+        }, 100);
     }
 </script>
 
