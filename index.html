@@ -50,11 +50,12 @@
             max-width: 75%;
             padding: 10px;
             border-radius: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-size: 14px;
             word-wrap: break-word;
             white-space: pre-line;
             position: relative;
+            min-height: 35px; /* Pastikan timestamp tetap lurus */
         }
         .user {
             background: #007bff;
@@ -70,13 +71,15 @@
             font-size: 10px;
             color: #bbb;
             position: absolute;
-            bottom: -18px;
+            bottom: 0;
+            white-space: nowrap;
+            padding: 2px 5px;
         }
         .user .timestamp {
             right: 10px;
         }
         .bot .timestamp {
-            left: 10px; /* Memindahkan timestamp bot ke kiri bawah */
+            left: 10px;
         }
         .input-box {
             position: fixed;
@@ -127,6 +130,8 @@
         .typing-indicator span:nth-child(1) { animation-delay: 0s; }
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator span:nth-child(4) { animation-delay: 0.6s; }
+        .typing-indicator span:nth-child(5) { animation-delay: 0.8s; }
 
         @keyframes typing {
             0% { opacity: 0.3; transform: translateY(0px); }
@@ -158,24 +163,22 @@
 
         showTypingIndicator();
 
-        setTimeout(async () => {
-            try {
-                const response = await axios.post("https://luminai.my.id/", {
-                    content: message,
-                    user: "User",
-                    prompt: "Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu."
-                });
+        try {
+            const response = await axios.post("https://luminai.my.id/", {
+                content: message,
+                user: "User",
+                prompt: "Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu."
+            });
 
-                hideTypingIndicator();
-                const botReply = response.data.result || "Error: Tidak ada respons dari server.";
-                addMessage(botReply.replace(/\\n/g, "\n"), "bot");
-            } catch (err) {
-                hideTypingIndicator();
-                addMessage("❌ Error: " + err.message, "bot");
-            }
+            hideTypingIndicator();
+            const botReply = response.data.result || "Error: Tidak ada respons dari server.";
+            addMessage(botReply.replace(/\\n/g, "\n"), "bot");
+        } catch (err) {
+            hideTypingIndicator();
+            addMessage("❌ Error: " + err.message, "bot");
+        }
 
-            scrollToBottom();
-        }, 1000);
+        scrollToBottom();
     }
 
     function addMessage(text, sender) {
@@ -186,14 +189,10 @@
         messageDiv.textContent = text;
         messageDiv.classList.add("message", sender);
 
+        messageDiv.style.minHeight = "35px"; 
+
         timestamp.textContent = getCurrentTime();
         timestamp.classList.add("timestamp");
-
-        if (sender === "user") {
-            timestamp.classList.add("user");
-        } else {
-            timestamp.classList.add("bot");
-        }
 
         messageDiv.appendChild(timestamp);
         chatBox.appendChild(messageDiv);
@@ -238,7 +237,7 @@
         const typingDiv = document.createElement("div");
         typingDiv.classList.add("typing-indicator");
         typingDiv.id = "typingIndicator";
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 5; i++) {
             const dot = document.createElement("span");
             typingDiv.appendChild(dot);
         }
