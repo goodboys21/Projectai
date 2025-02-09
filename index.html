@@ -50,7 +50,7 @@
             max-width: 75%;
             padding: 10px;
             border-radius: 15px;
-            margin-bottom: 20px; /* Memberikan ruang antar pesan */
+            margin-bottom: 20px;
             font-size: 14px;
             word-wrap: break-word;
             white-space: pre-line;
@@ -70,8 +70,13 @@
             font-size: 10px;
             color: #bbb;
             position: absolute;
-            bottom: -18px; /* Memberikan jarak lebih jauh */
+            bottom: -18px;
+        }
+        .user .timestamp {
             right: 10px;
+        }
+        .bot .timestamp {
+            left: 10px; /* Memindahkan timestamp bot ke kiri bawah */
         }
         .input-box {
             position: fixed;
@@ -170,7 +175,7 @@
             }
 
             scrollToBottom();
-        }, 1000); // Tambahkan delay 1 detik sebelum bot membalas
+        }, 1000);
     }
 
     function addMessage(text, sender) {
@@ -183,6 +188,12 @@
 
         timestamp.textContent = getCurrentTime();
         timestamp.classList.add("timestamp");
+
+        if (sender === "user") {
+            timestamp.classList.add("user");
+        } else {
+            timestamp.classList.add("bot");
+        }
 
         messageDiv.appendChild(timestamp);
         chatBox.appendChild(messageDiv);
