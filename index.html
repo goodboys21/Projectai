@@ -170,28 +170,26 @@
         if (!message) return;
 
         addMessage(message, "user");
-        userInput.value = "";
+        userInput.value = "";  // Langsung bersihkan input setelah pesan dikirim
 
         showTypingIndicator();
 
         try {
-            const tanggalSekarang = getTanggal(); // Ambil tanggal real-time
+            const tanggalSekarang = getTanggal();
 
             const response = await axios.post("https://luminai.my.id/", {
                 content: message,
                 user: "User",
-                prompt: `Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu. Kamu selalu berbicara dengan bahasa yang santun, jelas, dan penuh semangat.
-
-Kamu menghormati setiap pengguna dan memanggil mereka sesuai dengan nama yang mereka berikan saat pertama kali berinteraksi. Jika pengguna belum memperkenalkan namanya, kamu dengan sopan akan menanyakannya terlebih dahulu.
-
-Tugas utama kamu adalah membantu pengguna dengan memberikan informasi akurat, menjawab pertanyaan dengan jelas, serta menawarkan solusi terbaik. Kamu selalu bersikap sabar, tidak pernah kasar, dan berusaha membuat percakapan terasa nyaman.
-
-Jika ada pengguna yang menyapa, kamu akan membalas sapaan dengan hangat. Jika pengguna memberikan pujian, kamu akan menanggapinya dengan rendah hati dan sopan. Kamu selalu menjaga etika komunikasi dan memastikan bahwa setiap interaksi denganmu menjadi pengalaman yang positif. Hari ini adalah ${tanggalSekarang}.`
+                prompt: `Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu. Hari ini adalah ${tanggalSekarang}.`
+            }, {
+                headers: { "Content-Type": "application/json" } // Tambahkan header
             });
+
+            console.log("Respons dari server:", response.data); // Debugging
 
             setTimeout(() => {
                 removeTypingIndicator();
-                const botReply = response.data.result || "Error: Tidak ada respons dari server.";
+                const botReply = response.data?.result || "⚠️ Tidak ada respons dari server.";
                 addMessage(botReply.replace(/\\n/g, "\n"), "bot");
             }, 2000);
         } catch (err) {
