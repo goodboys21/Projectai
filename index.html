@@ -84,6 +84,39 @@
         .bot-container .timestamp {
             align-self: flex-start;
         }
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #333;
+            border-radius: 15px;
+            width: 50px;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            margin: 0 2px;
+            background: white;
+            border-radius: 50%;
+            display: inline-block;
+            animation: typingWave 1.5s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator span:nth-child(4) { animation-delay: 0.6s; }
+        .typing-indicator span:nth-child(5) { animation-delay: 0.8s; }
+
+        @keyframes typingWave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .input-box {
             position: fixed;
             bottom: 0;
@@ -139,6 +172,8 @@
         addMessage(message, "user");
         userInput.value = "";
 
+        showTypingIndicator();
+
         try {
             const response = await axios.post("https://luminai.my.id/", {
                 content: message,
@@ -146,9 +181,13 @@
                 prompt: "Nama kamu adalah Bagus-Ai, sebuah AI yang dirancang oleh Bagus Bahril untuk menjadi asisten virtual yang sopan, ramah, dan membantu."
             });
 
-            const botReply = response.data.result || "Error: Tidak ada respons dari server.";
-            addMessage(botReply.replace(/\\n/g, "\n"), "bot");
+            setTimeout(() => {
+                removeTypingIndicator();
+                const botReply = response.data.result || "Error: Tidak ada respons dari server.";
+                addMessage(botReply.replace(/\\n/g, "\n"), "bot");
+            }, 2000);
         } catch (err) {
+            removeTypingIndicator();
             addMessage("❌ Error: " + err.message, "bot");
         }
 
@@ -173,6 +212,25 @@
         chatBox.appendChild(container);
 
         scrollToBottom();
+    }
+
+    function showTypingIndicator() {
+        const chatBox = document.getElementById("chatBox");
+        const typingDiv = document.createElement("div");
+        typingDiv.classList.add("message-container", "bot-container");
+        typingDiv.id = "typingIndicator";
+        typingDiv.innerHTML = `
+            <div class="typing-indicator">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+        `;
+        chatBox.appendChild(typingDiv);
+        scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+        const typingDiv = document.getElementById("typingIndicator");
+        if (typingDiv) typingDiv.remove();
     }
 
     function handleEnter(event) {
